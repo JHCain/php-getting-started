@@ -1,0 +1,80 @@
+<?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+$url = 'https://json-csv.com/api/getcsv';
+$email = 'jhcain@jhcain.com';
+$myFile = file_get_contents('testFile.txt');
+$json = $myFile;
+
+    $postdata = http_build_query(
+      array(
+        'email' => $email,
+        'json' => $json
+      )
+    );
+
+    $opts = array(
+      'http' => array(
+        'method'  => 'POST',
+        'header'  => 'Content-type: application/x-www-form-urlencoded',
+        'content' => $postdata
+      )
+    );
+    $context  = stream_context_create($opts);
+    $result = file_get_contents($url, false, $context);
+// print $result;
+
+$csvFile = "csvfile.txt";
+
+//file_put_contents($myFile,time(), FILE_APPEND);
+file_put_contents($csvFile,$result);
+
+$row = 1;
+//if (($handle = stream_get_contents($stream)) !== FALSE) {
+
+    echo 'Hello!';
+    
+if (($handle = fopen("csvfile.txt", "r")) !== FALSE) {   
+    echo '<table border="1">';
+   
+    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+        $num = count($data);
+        if ($row == 1) {
+            echo '<thead><tr>';
+        }else{
+            echo '<tr>';
+        }
+       
+        for ($c=0; $c < $num; $c++) {
+            //echo $data[$c] . "<br />\n";
+            if(empty($data[$c])) {
+               $value = "&nbsp;";
+            }else{
+               $value = $data[$c];
+            }
+            if ($row == 1) {
+                echo '<th>'.$value.'</th>';
+            }else{
+                echo '<td nowrap>'.$value.'</td>';
+            }
+        }
+       
+        if ($row == 1) {
+            echo '</tr></thead><tbody>';
+        }else{
+            echo '</tr>';
+        }
+        $row++;
+    }
+   
+    echo '</tbody></table>';
+    fclose($handle);
+}
+
+
+
+
+    ?>
